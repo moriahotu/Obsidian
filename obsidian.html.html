@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Obsidian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #000;
+    }
+    
+    h1.type-style {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700;
+      color: #f2f2f2;
+      text-align: center;
+      white-space: nowrap;
+    }
+    
+    .typewrite > .wrap {
+      border-right: none;
+    }
+    
+    #heading {
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+ <h1 class="type-style" id="heading">
+    <span id="prefix">RE-DEFINING </span>
+    <span class="typewrite" data-period="2000" data-type="[&quot;CONTENT.&quot;, &quot;CULTURE.&quot;, &quot;COMMUNITY.&quot;]"></span>
+</h1>
+ 
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+  <script>
+    class TypeWriter {
+      constructor(el, words, period) {
+        this.el = el;
+        this.words = words;
+        this.period = parseInt(period, 10) || 2000;
+        this.txt = '';
+        this.wordIndex = 0;
+        this.isDeleting = false;
+        this.tick();
+      }
+
+      tick() {
+        const currentWord = this.words[this.wordIndex % this.words.length];
+        const typingSpeed = 80 - Math.random() * 30;
+
+        if (this.isDeleting) {
+          this.txt = currentWord.substring(0, this.txt.length - 1);
+        } else {
+          this.txt = currentWord.substring(0, this.txt.length + 1);
+        }
+
+        this.el.innerHTML = '<span class="wrap">'+this.txt+'</span>';
+
+        if (!this.isDeleting && this.txt === currentWord) {
+          setTimeout(() => {
+            this.isDeleting = true;
+            this.tick();
+          }, this.period);
+        } else if (this.isDeleting && this.txt === '') {
+          this.isDeleting = false;
+          this.wordIndex++;
+          
+          if (this.wordIndex === this.words.length) {
+            this.transitionToObsidian();
+            return;
+          }
+          
+          setTimeout(() => this.tick(), 500);
+        } else {
+          setTimeout(() => this.tick(), this.isDeleting ? typingSpeed/2 : typingSpeed);
+        }
+      }
+
+      transitionToObsidian() {
+        const prefix = document.getElementById('prefix');
+        if (!prefix) return;
+        
+        let text = prefix.textContent;
+        this.el.innerHTML = '';
+        
+        const removeLetters = () => {
+          if (text.length > 0) {
+            text = text.substring(0, text.length - 1);
+            prefix.textContent = text;
+            setTimeout(removeLetters, 50);
+          } else {
+            setTimeout(() => {
+              this.typeNewText(prefix, 'THE OBSIDIAN');
+            }, 300);
+          }
+        };
+        
+        removeLetters();
+      }
+
+      typeNewText(element, text, index = 0) {
+        if (index < text.length) {
+          element.textContent = text.substring(0, index + 1);
+          setTimeout(() => this.typeNewText(element, text, index + 1), 100);
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.getElementsByClassName('typewrite');
+      for (let el of elements) {
+        try {
+          const words = JSON.parse(el.getAttribute('data-type').replace(/&quot;/g, '"'));
+          const period = el.getAttribute('data-period');
+          if (words) {
+            new TypeWriter(el, words, period);
+          }
+        } catch (e) {
+          console.error('TypeWriter error:', e);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
